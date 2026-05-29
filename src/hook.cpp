@@ -159,11 +159,10 @@ static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lP
         const KBDLLHOOKSTRUCT* pKbd = reinterpret_cast<const KBDLLHOOKSTRUCT*>(lParam);
 
         // Skip events we injected.
-        // Primary guard: LLKHF_INJECTED (set by SendInput for all injected events).
-        // Secondary guard: our dwExtraInfo magic stamp, because KEYEVENTF_UNICODE
-        // events don't always receive LLKHF_INJECTED on all Windows builds.
-        bool isOurs = (pKbd->flags & LLKHF_INJECTED) ||
-                      (pKbd->dwExtraInfo == INJECTION_MAGIC);
+        // We use our dwExtraInfo magic stamp as the primary guard because
+        // LLKHF_INJECTED can be set on OS-generated auto-repeat events for injected
+        // keys, which would cause us to leak those repeat events.
+        bool isOurs = (pKbd->dwExtraInfo == INJECTION_MAGIC);
         if (!isOurs) {
             // Block the keyup event corresponding to the triggered hotstring keydown
             if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP) {
@@ -183,7 +182,16 @@ static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lP
                 if (vk == VK_PACKET && g_suppressVkPacket) {
                     return 1;
                 }
-                g_suppressVkPacket = false;
+
+                // Block repeat keydowns of the triggering key while it is held down
+                if (vk == g_blockedVkCode && g_blockedVkCode != 0) {
+                    return 1;
+                }
+
+                // Clear the suppression flag only for a NEW physical key press (not the triggering key, and not VK_PACKET)
+                if (vk != VK_PACKET && vk != g_blockedVkCode) {
+                    g_suppressVkPacket = false;
+                }
 
                 // ---- Panic: Ctrl+Shift+Esc ----
                 if (vk == VK_ESCAPE &&
