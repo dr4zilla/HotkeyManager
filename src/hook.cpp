@@ -42,6 +42,12 @@ namespace {
     // Track the virtual key code of the triggering key so we can block its corresponding keyup event
     DWORD        g_blockedVkCode = 0;
 
+    // After a KEYEVENTF_UNICODE expansion, the OS can generate VK_PACKET
+    // auto-repeat events (for the last injected char) that don't carry
+    // INJECTION_MAGIC. Set to true after every expansion and cleared on the
+    // next physical non-VK_PACKET keydown to suppress those spurious repeats.
+    bool         g_suppressVkPacket = false;
+
     // Magic stamp placed in dwExtraInfo on every INPUT we inject.
     // LLKHF_INJECTED is unreliable for KEYEVENTF_UNICODE events on some
     // Windows builds, so we use our own marker to skip our own keystrokes.
@@ -170,6 +176,15 @@ static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lP
             if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
                 DWORD vk = pKbd->vkCode;
 
+                // Block OS-generated VK_PACKET auto-repeat events that fire
+                // after a KEYEVENTF_UNICODE expansion in classic Win32 edit
+                // controls (Notepad). These don't carry INJECTION_MAGIC so
+                // they slip past isOurs and cause the last char to loop.
+                if (vk == VK_PACKET && g_suppressVkPacket) {
+                    return 1;
+                }
+                g_suppressVkPacket = false;
+
                 // ---- Panic: Ctrl+Shift+Esc ----
                 if (vk == VK_ESCAPE &&
                     (GetAsyncKeyState(VK_CONTROL) & 0x8000) &&
@@ -277,6 +292,7 @@ static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lP
         // Clear the pending state BEFORE calling InjectExpansion to prevent recursive triggers
         g_pendingExpansion.clear();
         g_pendingDeleteCount = 0;
+        g_suppressVkPacket = true;
 
         InjectExpansion(deleteCount, expansion, triggerVk);
     }
