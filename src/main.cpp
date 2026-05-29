@@ -71,7 +71,10 @@ int WINAPI wWinMain(
     // ---- Determine the application directory ----
     // The data file (hotkeys.dat) lives next to the .exe
     wchar_t exePath[MAX_PATH] = {};
-    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+    DWORD len = GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+    if (len == 0 || len >= MAX_PATH) {
+        return 1;
+    }
 
     // Strip the filename to get the directory
     std::wstring appDir(exePath);

@@ -134,7 +134,7 @@ namespace {
         if (hFile == INVALID_HANDLE_VALUE) return {};
 
         DWORD fileSize = GetFileSize(hFile, nullptr);
-        if (fileSize == 0 || fileSize == INVALID_FILE_SIZE) {
+        if (fileSize == 0 || fileSize == INVALID_FILE_SIZE || fileSize > 10 * 1024 * 1024) {
             CloseHandle(hFile);
             return {};
         }
