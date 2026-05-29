@@ -1,0 +1,37 @@
+# IDE / Tool Settings
+.claude/
+
+# Visual Studio Build and Intermediate Files
+build/
+.vs/
+x64/
+Debug/
+Release/
+
+# User-specific project settings
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Database and compilation artifacts
+*.db
+*.opendb
+*.ipch
+*.tlog
+*.log
+*.obj
+*.pch
+*.pdb
+*.ilk
+*.exe
+*.lib
+*.dll
+
+# App runtime data files
+hotkeys.dat
+_active_hotkeys.ahk
+feedback.md
+all_user_messages.txt
+extract_messages.py
+read_transcript.py

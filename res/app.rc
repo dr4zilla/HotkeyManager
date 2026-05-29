@@ -1,0 +1,38 @@
+// Resource script for Hotkey & Hotstring Manager.
+// NOTE: The application manifest (app.manifest) is embedded by MSBuild via
+// the linker's /MANIFEST flag. Do NOT add an RT_MANIFEST resource here,
+// as it would cause a CVT1100 duplicate resource error.
+
+#include <winresrc.h>
+#include "resource.h"
+
+// ---- Icon ----
+IDI_APP_ICON            ICON                    "app.ico"
+
+// ---- Version information ----
+VS_VERSION_INFO VERSIONINFO
+    FILEVERSION    1,0,0,0
+    PRODUCTVERSION 1,0,0,0
+    FILEFLAGSMASK  VS_FFI_FILEFLAGSMASK
+    FILEFLAGS      0
+    FILEOS         VOS__WINDOWS32
+    FILETYPE       VFT_APP
+    FILESUBTYPE    VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "FileDescription",  "Hotkey & Hotstring Manager"
+            VALUE "FileVersion",      "1.0.0.0"
+            VALUE "InternalName",     "HotkeyManager"
+            VALUE "OriginalFilename", "HotkeyManager.exe"
+            VALUE "ProductName",      "Hotkey Manager"
+            VALUE "ProductVersion",   "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 0x04B0
+    END
+END

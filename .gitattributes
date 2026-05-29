@@ -1,0 +1,17 @@
+# Auto-detect text files and normalize line endings
+* text=auto
+
+# Enforce CRLF for Visual Studio and Resource files
+*.sln text eol=crlf
+*.vcxproj text eol=crlf
+*.vcxproj.user text eol=crlf
+*.rc text eol=crlf
+*.manifest text eol=crlf
+
+# Enforce CRLF for C++ Source and Header files
+*.cpp text eol=crlf
+*.h text eol=crlf
+
+# Enforce LF for Git settings and documentation
+*.md text eol=lf
+.gitignore text eol=lf
