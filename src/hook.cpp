@@ -107,7 +107,7 @@ bool Hook::Install(HINSTANCE hInstance)
     if (g_hKeyboardHook != nullptr) return true;
 
     // Cache initial hotstring list
-    const auto& hs = ScriptWriter::GetHotstrings();
+    const auto hs = ScriptWriter::GetHotstrings();
     g_hotstrings.assign(hs.begin(), hs.end());
 
     g_hKeyboardHook = SetWindowsHookExW(
@@ -129,7 +129,7 @@ void Hook::Uninstall()
 
 void Hook::UpdateHotstrings()
 {
-    const auto& hs = ScriptWriter::GetHotstrings();
+    const auto hs = ScriptWriter::GetHotstrings();
     g_hotstrings.assign(hs.begin(), hs.end());
     g_buffer.clear();
 }

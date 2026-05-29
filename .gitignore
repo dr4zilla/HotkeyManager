@@ -1,37 +1,87 @@
-# IDE / Tool Settings
-.claude/
-
-# Visual Studio Build and Intermediate Files
-build/
-.vs/
-x64/
-Debug/
-Release/
-
-# User-specific project settings
+# Visual Studio — generated files
+*.rsuser
 *.user
-*.suo
 *.userosscache
 *.sln.docstates
 
-# Database and compilation artifacts
-*.db
-*.opendb
-*.ipch
-*.tlog
-*.log
-*.obj
-*.pch
+# Visual Studio — binary and debug
+*.suo
 *.pdb
 *.ilk
-*.exe
-*.lib
-*.dll
+*.meta
+*.obj
+*.iobj
+*.pch
+*.ipch
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
 
-# App runtime data files
+# Visual Studio — cache and databases
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.opendb
+
+# Visual Studio — publish / output
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio — IDE state
+.vs/
+.vscode/
+
+# Visual Studio — build output directory (project-specific)
+build/
+
+# Compiled output
+*.exe
+*.dll
+*.lib
+*.exp
+*.res
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+!**/packages/repositories.config
+*.nuget.props
+*.nuget.targets
+
+# Application runtime data
 hotkeys.dat
-_active_hotkeys.ahk
+hotkeys.dat.bak
+
+# Local tool and IDE agent state
+.claude/
+.gemini/
 feedback.md
-all_user_messages.txt
-extract_messages.py
-read_transcript.py

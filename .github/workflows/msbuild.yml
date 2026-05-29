@@ -21,4 +21,4 @@ jobs:
       uses: microsoft/setup-msbuild@v2
 
     - name: Build Solution (Release | x64)
-      run: msbuild HotkeyManager.sln /p:Configuration=Release /p:Platform=x64 /t:Rebuild
+      run: msbuild HotkeyManager.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /t:Rebuild

@@ -16,6 +16,7 @@
 #include "resource.h"
 #include <commctrl.h>
 #include <sstream>
+#include <mutex>
 
 //-----------------------------------------------------------------------------
 // Module state
@@ -25,6 +26,7 @@ namespace {
     std::wstring                s_scriptPath;
     std::vector<HotkeyEntry>    s_hotkeys;
     std::vector<HotstringEntry> s_hotstrings;
+    std::recursive_mutex        s_writerMutex;
 
     //-------------------------------------------------------------------------
     // VK display name table
@@ -213,6 +215,7 @@ std::wstring ScriptWriter::HotkeyToDisplayString(WORD vk, WORD modifiers)
 //-----------------------------------------------------------------------------
 bool ScriptWriter::Load()
 {
+    std::lock_guard<std::recursive_mutex> lock(s_writerMutex);
     s_hotkeys.clear();
     s_hotstrings.clear();
 
@@ -268,6 +271,7 @@ bool ScriptWriter::Load()
 //-----------------------------------------------------------------------------
 bool ScriptWriter::Save()
 {
+    std::lock_guard<std::recursive_mutex> lock(s_writerMutex);
     std::wstring content;
     content += L"; Hotkey Manager data file — do not edit manually\r\n";
     content += L"\r\n";
@@ -313,12 +317,14 @@ bool ScriptWriter::Save()
 
 bool ScriptWriter::AddHotkey(WORD vk, WORD modifiers, const std::wstring& target)
 {
+    std::lock_guard<std::recursive_mutex> lock(s_writerMutex);
     s_hotkeys.push_back({ vk, modifiers, target });
     return Save();
 }
 
 bool ScriptWriter::RemoveHotkey(size_t index)
 {
+    std::lock_guard<std::recursive_mutex> lock(s_writerMutex);
     if (index >= s_hotkeys.size()) return false;
     s_hotkeys.erase(s_hotkeys.begin() + index);
     return Save();
@@ -326,12 +332,14 @@ bool ScriptWriter::RemoveHotkey(size_t index)
 
 bool ScriptWriter::AddHotstring(const std::wstring& abbreviation, const std::wstring& expansion)
 {
+    std::lock_guard<std::recursive_mutex> lock(s_writerMutex);
     s_hotstrings.push_back({ abbreviation, expansion });
     return Save();
 }
 
 bool ScriptWriter::RemoveHotstring(size_t index)
 {
+    std::lock_guard<std::recursive_mutex> lock(s_writerMutex);
     if (index >= s_hotstrings.size()) return false;
     s_hotstrings.erase(s_hotstrings.begin() + index);
     return Save();
@@ -341,12 +349,14 @@ bool ScriptWriter::RemoveHotstring(size_t index)
 // Read-only accessors
 //-----------------------------------------------------------------------------
 
-const std::vector<HotkeyEntry>& ScriptWriter::GetHotkeys()
+std::vector<HotkeyEntry> ScriptWriter::GetHotkeys()
 {
+    std::lock_guard<std::recursive_mutex> lock(s_writerMutex);
     return s_hotkeys;
 }
 
-const std::vector<HotstringEntry>& ScriptWriter::GetHotstrings()
+std::vector<HotstringEntry> ScriptWriter::GetHotstrings()
 {
+    std::lock_guard<std::recursive_mutex> lock(s_writerMutex);
     return s_hotstrings;
 }

@@ -55,10 +55,10 @@ namespace ScriptWriter {
     bool RemoveHotstring(size_t index);
 
     //-------------------------------------------------------------------------
-    // Read-only access to current state.
+    // Retrieve a copy of the current state (thread-safe).
     //-------------------------------------------------------------------------
-    const std::vector<HotkeyEntry>& GetHotkeys();
-    const std::vector<HotstringEntry>& GetHotstrings();
+    std::vector<HotkeyEntry> GetHotkeys();
+    std::vector<HotstringEntry> GetHotstrings();
 
     //-------------------------------------------------------------------------
     // Get the full path to the data file.

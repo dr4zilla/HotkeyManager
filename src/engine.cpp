@@ -52,15 +52,13 @@ namespace {
     //-------------------------------------------------------------------------
     static void RegisterAllHotkeys()
     {
-        const auto& hotkeys = ScriptWriter::GetHotkeys();
-        g_registeredCount = 0;
+        const auto hotkeys = ScriptWriter::GetHotkeys();
+        g_registeredCount = (int)hotkeys.size();
 
         for (int i = 0; i < (int)hotkeys.size(); ++i) {
             const auto& hk = hotkeys[i];
             UINT mod = HotkeyFlagsToMod(hk.modifiers);
-            if (RegisterHotKey(g_hEngineWnd, i, mod, hk.vk)) {
-                g_registeredCount = i + 1;
-            }
+            RegisterHotKey(g_hEngineWnd, i, mod, hk.vk);
             // Silent skip on failure — another app may have grabbed the combo.
         }
     }
@@ -75,7 +73,7 @@ namespace {
         case WM_HOTKEY:
         {
             int id = (int)wParam;
-            const auto& hotkeys = ScriptWriter::GetHotkeys();
+            const auto hotkeys = ScriptWriter::GetHotkeys();
             if (id >= 0 && id < (int)hotkeys.size()) {
                 ShellExecuteW(nullptr, L"open",
                               hotkeys[id].target.c_str(),

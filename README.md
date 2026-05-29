@@ -1,99 +1,119 @@
 # Hotkey Manager
 
-A lightweight, zero-dependency Win32 application for managing global keyboard hotkeys and hotstrings on Windows.
+![Build](https://github.com/dr4zilla/HotkeyManager/actions/workflows/msbuild.yml/badge.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4?logo=windows&logoColor=white)
+![Language](https://img.shields.io/badge/C%2B%2B17-Win32-00599C?logo=cplusplus&logoColor=white)
+
+A native Win32 utility for binding global keyboard shortcuts and text expansions on Windows — no runtime, no interpreter, no background service. One `.exe`, pure Win32 API.
 
 ---
 
-## Features
+## What it does
 
-**Global Hotkeys**
-- Bind any key combination (Ctrl, Alt, Shift, Win + key) to launch an application or open a file
-- Hotkeys fire system-wide regardless of which window has focus
-- Built-in conflict detection blocks dangerous bindings (system shortcuts, universal clipboard keys, browser shortcuts) before they can lock up your input
+**Global Hotkeys** — Bind any modifier + key combination to instantly launch an application or open a file, system-wide, regardless of which window has focus.
 
-**Hotstrings (Text Expansion)**
-- Define abbreviation → expansion pairs that fire as you type
-- Expansions trigger immediately on the last character of the abbreviation — no terminator key required
-- Word-boundary detection prevents mid-word false positives (typing `testbtw` does not trigger `btw`)
-- Works in any application: browsers, editors, terminals, chat apps
+**Text Expansion (Hotstrings)** — Define abbreviation → expansion pairs that fire as you type. Type `btw` anywhere and it replaces with `by the way`. Works in every application: browsers, terminals, editors, chat apps.
 
-**System Tray**
-- Minimises to the system tray instead of the taskbar
-- Double-click or right-click → Open to restore; right-click → Exit to quit
-- Single-instance enforced across privilege levels (standard and elevated processes share the mutex)
+**Conflict detection** — A built-in safety matrix blocks registrations that would override critical system shortcuts (Win+L, Ctrl+Alt+Del, Alt+F4, etc.) before they can lock up your input.
 
-**Emergency Exit**
-- Press `Ctrl + Shift + Esc` at any time to immediately terminate the hook and exit the process — useful if a misbehaving hotstring gets stuck
+**System tray** — Runs quietly in the tray. Double-click to open, right-click to exit. Minimising or closing the window sends it back to the tray instead of quitting.
+
+**Single instance** — Only one copy runs at a time, even across different privilege levels (standard user vs. elevated). A second launch restores the existing window.
+
+**Emergency exit** — `Ctrl+Shift+Esc` immediately unhooks and exits the process if anything goes wrong.
 
 ---
 
-## Requirements
+## Known Limitations
 
-- Windows 10 or Windows 11 (x64)
-- Visual Studio 2022 with the **Desktop development with C++** workload
-- Windows SDK 10.0
+**Elevated windows** — When running as a standard user, the keyboard hook cannot inject text into applications running as Administrator (e.g. an elevated terminal). Run `HotkeyManager.exe` as Administrator if you need hotstrings to work everywhere.
+
+**Antivirus flags** — A global keyboard hook that monitors input and injects keystrokes matches the heuristic signature of a keylogger. Some AV engines will flag or quarantine the binary. The source is fully open — build from source if you need to verify it.
 
 ---
 
 ## Building
 
-1. Open `HotkeyManager.sln` in Visual Studio 2022
-2. Select **Release | x64** from the configuration drop-down
-3. Build → Build Solution (`Ctrl+Shift+B`)
-4. The output binary is written to `build\Release\HotkeyManager.exe`
+**Requirements**
+- Windows 10 or 11 (x64)
+- Visual Studio 2022 or later with the *Desktop development with C++* workload
+- Windows SDK 10.0
 
-The project has no external dependencies. Everything links against the standard Windows SDK libraries (`comctl32`, `shell32`, `comdlg32`).
+**Steps**
+1. Open `HotkeyManager.sln`
+2. Set configuration to **Release | x64**
+3. `Ctrl+Shift+B` → Build Solution
+4. Binary is output to `build\Release\HotkeyManager.exe`
+
+No external packages. Links only against `comctl32`, `shell32`, and `comdlg32` from the Windows SDK.
 
 ---
 
 ## Usage
 
 **Adding a hotkey**
-1. Click inside the *Key Combination* field and press the desired key combination
-2. Type the target path directly or click **...** to browse for an executable or file
-3. Click **Add Hotkey** — the binding activates immediately, no restart required
+1. Click in the *Key Combination* field and press the desired shortcut
+2. Enter the target path or click **...** to browse for an executable or file
+3. Click **Add Hotkey** — the binding is active immediately
 
 **Adding a hotstring**
 1. Switch to the *Hotstrings* tab
-2. Enter the abbreviation (e.g. `btw`) and the expansion text (e.g. `by the way`)
-3. Click **Add Hotstring** — from this point, typing `btw` anywhere on the system replaces it with the expansion
+2. Enter the abbreviation and the expansion text
+3. Click **Add Hotstring** — typing the abbreviation anywhere replaces it inline
 
-**Deleting an entry**
-- Select the row in the list and click **Delete**
+**Removing an entry** — select the row and click **Delete**
+
+**Hotstring matching** fires on the last character of the abbreviation with no terminator key. A word-boundary check prevents false positives — typing `testbtw` will not trigger a `btw` hotstring.
 
 ---
 
-## Data File
+## Data
 
-All hotkeys and hotstrings are persisted in `hotkeys.dat`, stored next to the executable. The file format is plain UTF-8 text and can be inspected manually:
+Everything is stored in `hotkeys.dat` next to the executable. Plain UTF-8, human-readable:
 
 ```
+; Hotkey Manager data file
 [hotkeys]
-<vk_decimal>  <modifiers_decimal>  <target_path>
+78	6	C:\Windows\notepad.exe
 
 [hotstrings]
-<abbreviation>  <expansion>
+btw	by the way
+omw	on my way
 ```
 
-Backslash escape sequences (`\\`, `\n`, `\r`, `\t`) are used for special characters in field values.
+Columns for hotkeys are `vk_decimal`, `modifiers_decimal`, `target_path`. Backslash escapes (`\\`, `\n`, `\t`) are used in field values.
 
 ---
 
 ## Architecture
 
-| Component | Description |
-|---|---|
-| `main.cpp` | Entry point. Creates the sync event, initialises the script writer, spawns the GUI thread, runs the engine on the main thread. |
-| `engine.cpp` | Hidden message-only window (`HWND_MESSAGE`) on the main thread. Owns `RegisterHotKey` / `UnregisterHotKey` and responds to `WM_HOTKEY`, `WM_ENGINE_RELOAD`, `WM_ENGINE_SHUTDOWN`. |
-| `hook.cpp` | System-wide low-level keyboard hook (`WH_KEYBOARD_LL`). Manages the hotstring character buffer, word-boundary checking, and `SendInput` injection. |
-| `gui.cpp` | GUI thread. Native Win32 tab control with two pages (Hotkeys, Hotstrings). Sends `WM_ENGINE_RELOAD` after each mutation. |
-| `script_writer.cpp` | In-memory data model and `hotkeys.dat` I/O. Handles UTF-8 encoding, field escaping, and atomic file writes. |
-| `conflict.cpp` | Static safety matrix of reserved system and application shortcuts. Called before any `RegisterHotKey` to prevent input lockouts. |
+The application uses two threads with no shared locks — all coordination goes through posted window messages.
 
-The engine and GUI run on separate threads. All coordination goes through posted window messages — no shared locks required outside of the `HANDLE` event used at startup.
+```
+Main thread                    GUI thread
+───────────────                ────────────────────────────
+Engine (hidden HWND)           Win32 window (Tab control)
+├─ WH_KEYBOARD_LL hook         ├─ Hotkeys tab
+│   ├─ Hotstring buffer        │   ├─ MSCTLS_HOTKEY32 input
+│   └─ SendInput injection     │   └─ ListView
+├─ RegisterHotKey              ├─ Hotstrings tab
+└─ WM_HOTKEY → ShellExecute    │   └─ ListView
+                               └─ Posts WM_ENGINE_RELOAD
+                                  on every add/delete
+```
+
+| File | Responsibility |
+|---|---|
+| `engine.cpp` | Hidden message window, hotkey registration, `WM_HOTKEY` dispatch |
+| `hook.cpp` | Low-level keyboard hook, typed-character buffer, expansion injection |
+| `gui.cpp` | Tab UI, tray icon, user input, file browser |
+| `script_writer.cpp` | In-memory data model, `hotkeys.dat` read/write, UTF-8 I/O |
+| `conflict.cpp` | Static safety matrix of reserved system and app shortcuts |
+| `main.cpp` | Entry point, single-instance mutex, thread orchestration |
 
 ---
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+[MIT](LICENSE)

@@ -84,7 +84,7 @@ namespace {
     {
         ListView_DeleteAllItems(g_hHotkeyList);
 
-        const auto& hotkeys = ScriptWriter::GetHotkeys();
+        const auto hotkeys = ScriptWriter::GetHotkeys();
         for (size_t i = 0; i < hotkeys.size(); ++i) {
             const auto& hk = hotkeys[i];
 
@@ -109,7 +109,7 @@ namespace {
     {
         ListView_DeleteAllItems(g_hHsList);
 
-        const auto& hotstrings = ScriptWriter::GetHotstrings();
+        const auto hotstrings = ScriptWriter::GetHotstrings();
         for (size_t i = 0; i < hotstrings.size(); ++i) {
             const auto& hs = hotstrings[i];
 
@@ -274,7 +274,7 @@ namespace {
         }
 
         // 4. Check for duplicate hotkey
-        const auto& existing = ScriptWriter::GetHotkeys();
+        const auto existing = ScriptWriter::GetHotkeys();
         for (const auto& hk : existing) {
             if (hk.vk == vk && hk.modifiers == modifiers) {
                 std::wstring display = ScriptWriter::HotkeyToDisplayString(vk, modifiers);
@@ -342,10 +342,8 @@ namespace {
             return;
         }
 
-
-
         // Check for duplicate abbreviation
-        const auto& existing = ScriptWriter::GetHotstrings();
+        const auto existing = ScriptWriter::GetHotstrings();
         for (const auto& hs : existing) {
             if (hs.abbreviation == abbrev) {
                 MessageBoxW(g_hMainWnd,
