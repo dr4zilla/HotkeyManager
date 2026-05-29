@@ -203,7 +203,7 @@ std::wstring ScriptWriter::HotkeyToDisplayString(WORD vk, WORD modifiers)
             }
         }
         wchar_t buf[16];
-        wsprintfW(buf, L"VK 0x%02X", vk);
+        swprintf_s(buf, L"VK 0x%02X", vk);
         result += buf;
     }
 
@@ -297,8 +297,9 @@ bool ScriptWriter::Save()
 
     std::string utf8 = WideToUtf8(content);
 
+    std::wstring tempPath = s_scriptPath + L".tmp";
     HANDLE hFile = CreateFileW(
-        s_scriptPath.c_str(), GENERIC_WRITE, 0, nullptr,
+        tempPath.c_str(), GENERIC_WRITE, 0, nullptr,
         CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr
     );
     if (hFile == INVALID_HANDLE_VALUE) return false;
@@ -308,7 +309,12 @@ bool ScriptWriter::Save()
     FlushFileBuffers(hFile);
     CloseHandle(hFile);
 
-    return (ok && written == (DWORD)utf8.size());
+    if (ok && written == (DWORD)utf8.size()) {
+        return MoveFileExW(tempPath.c_str(), s_scriptPath.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH);
+    } else {
+        DeleteFileW(tempPath.c_str());
+        return false;
+    }
 }
 
 //-----------------------------------------------------------------------------

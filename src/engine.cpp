@@ -138,7 +138,7 @@ int Engine::Initialize(HINSTANCE hInstance, HANDLE hReadyEvent)
     if (hReadyEvent != nullptr) SetEvent(hReadyEvent);
 
     // Block on the message loop until WM_QUIT
-    MSG msg;
+    MSG msg = {};
     while (GetMessageW(&msg, nullptr, 0, 0) > 0) {
         TranslateMessage(&msg);
         DispatchMessageW(&msg);

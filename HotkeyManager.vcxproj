@@ -86,6 +86,9 @@
       <AdditionalDependencies>comctl32.lib;shell32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'</AdditionalManifestDependencies>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>res\app.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(ProjectDir)src</AdditionalIncludeDirectories>
     </ResourceCompile>
@@ -112,6 +115,9 @@
       <AdditionalDependencies>comctl32.lib;shell32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'</AdditionalManifestDependencies>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>res\app.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(ProjectDir)src</AdditionalIncludeDirectories>
     </ResourceCompile>

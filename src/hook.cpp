@@ -22,6 +22,7 @@
 #include "script_writer.h"
 #include <vector>
 #include <string>
+#include <cwctype>
 
 //-----------------------------------------------------------------------------
 // Module state
@@ -215,8 +216,13 @@ static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lP
                     } else {
                         // Translate VK → character using the foreground window's layout
                         HWND  hFg  = GetForegroundWindow();
-                        DWORD tid  = GetWindowThreadProcessId(hFg, nullptr);
-                        HKL   layout = GetKeyboardLayout(tid);
+                        HKL   layout = nullptr;
+                        if (hFg != nullptr) {
+                            DWORD tid = GetWindowThreadProcessId(hFg, nullptr);
+                            layout = GetKeyboardLayout(tid);
+                        } else {
+                            layout = GetKeyboardLayout(0);
+                        }
 
                         // Build modifier state from async key state (more reliable in LL hooks)
                         BYTE keyState[256] = {};
